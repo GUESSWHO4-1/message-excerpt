@@ -31,7 +31,7 @@ input[type=text],input[type=number],select{width:100%;border:1px solid #d6d6dc;b
 .colors{display:flex;align-items:center;gap:8px}.colors input{width:44px;height:38px;border:0}
 .btn,.tool,.tab{border:1px solid #d6d6db;background:#fff;border-radius:9px;padding:8px 11px;font-weight:650}.btn.dark,.tab.on{background:#17171a;color:#fff}.btn.blue{background:#0a84ff;color:#fff;border-color:#0a84ff}.btn.red{color:#d70015}
 .editor{min-height:290px;border:1px solid #d6d6dc;border-radius:12px;padding:14px;line-height:1.8;white-space:pre-wrap;outline:none;background:#fff;overflow-wrap:anywhere}
-.editor:empty:before{content:"AI 채팅 원문을 여기에 붙여넣어.  *별표 안은 지문*, 별표 밖은 대사로 변환돼.";color:#aaa}
+.editor:empty:before{content:"AI 채팅 원문을 여기에 붙여넣어. 기본은 지문이고, 대사만 드래그해서 좌/우 말풍선을 지정해.";color:#aaa}
 .speaker-left{background:rgba(142,142,147,.17);border-radius:4px;box-shadow:inset 0 -2px 0 #8e8e93}
 .speaker-right{background:rgba(10,132,255,.13);border-radius:4px;box-shadow:inset 0 -2px 0 #0a84ff}
 .msgbreak{display:inline-block;width:0;height:1.1em;border-left:2px solid #ff9500;margin:0 5px;vertical-align:middle}.pagebreak{display:block;margin:10px 0;border:0;border-top:1px dashed #aaa;position:relative;height:18px}
@@ -98,7 +98,7 @@ input[type=text],input[type=number],select{width:100%;border:1px solid #d6d6dc;b
         <div id="editor" class="editor" contenteditable="true" spellcheck="false"></div>
         <div class="legend"><span><i class="dot dl"></i>상대 대사 지정</span><span><i class="dot dr"></i>내 대사 지정</span><span>*별표 안 = 지문 / 별표 밖 = 대사</span></div>
         <div class="actions" style="margin-top:12px"><button class="btn dark" id="convert">미리보기 변환</button></div>
-        <div class="help">AI 채팅을 그대로 붙여넣고 대사 부분을 드래그해 좌/우를 지정해. 지정하지 않은 대사는 기본적으로 상대(왼쪽)로 들어가. 지문 서식은 별표 안에 적용한 서식만 결과에 반영돼. 자간은 글자 사이 간격, 줄간격은 같은 지문 안의 다음 줄과의 거리를 조절해. 대사를 두 개의 연속 말풍선으로 만들고 싶으면 둘 사이에 커서를 두고 ‘말풍선 나누기’를 눌러.</div>
+        <div class="help">AI 채팅을 그대로 붙여넣으면 원본 사이트의 검은 배경·글씨색 같은 서식은 자동으로 제거되고, 지정하지 않은 부분은 기본적으로 지문(줄글)으로 들어가. 대사 부분만 드래그해 상대/내 말풍선을 지정해. *별표 안은 항상 지문으로 처리돼. 자간은 글자 사이 간격, 줄간격은 같은 지문 안의 다음 줄과의 거리를 조절해. 대사를 두 개의 연속 말풍선으로 만들고 싶으면 둘 사이에 커서를 두고 ‘말풍선 나누기’를 눌러.</div>
       </section>
     </main>
   </div>
@@ -138,6 +138,34 @@ function saveSelection(){
   if(s.rangeCount && E.contains(s.anchorNode) && E.contains(s.focusNode)) savedRange=s.getRangeAt(0).cloneRange();
 }
 E.addEventListener('mouseup',saveSelection); E.addEventListener('keyup',saveSelection);
+
+E.addEventListener('paste',e=>{
+  e.preventDefault();
+  const text=(e.clipboardData||window.clipboardData).getData('text/plain');
+  const sel=getSelection();
+  if(!sel.rangeCount)return;
+  const r=sel.getRangeAt(0);
+  r.deleteContents();
+
+  // 줄바꿈을 보존한 순수 텍스트로 삽입
+  const frag=document.createDocumentFragment();
+  const parts=text.replace(/\r\n?/g,'\n').split('\n');
+  parts.forEach((part,i)=>{
+    if(i)frag.appendChild(document.createElement('br'));
+    frag.appendChild(document.createTextNode(part));
+  });
+
+  const last=frag.lastChild;
+  r.insertNode(frag);
+  if(last){
+    r.setStartAfter(last);
+    r.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(r);
+    savedRange=r.cloneRange();
+  }
+});
+
 
 function useRange(){
   if(!savedRange || savedRange.collapsed) return null;
@@ -198,12 +226,18 @@ function serializeEditor(){
 function parse(){
   const clone=serializeEditor();
   const atoms=[];
+
   function walk(node,ctx={side:null,styles:[]}){
-    if(node.nodeType===3){if(node.nodeValue)atoms.push({text:node.nodeValue,side:ctx.side,styles:[...ctx.styles]});return}
+    if(node.nodeType===3){
+      if(node.nodeValue)atoms.push({text:node.nodeValue,side:ctx.side,styles:[...ctx.styles]});
+      return;
+    }
     if(node.nodeType!==1)return;
+
     let side=ctx.side;
     if(node.classList.contains('speaker-left'))side='left';
     if(node.classList.contains('speaker-right'))side='right';
+
     let styles=[...ctx.styles];
     const st=node.style;
     if(st.fontWeight)styles.push(['font-weight',st.fontWeight]);
@@ -213,48 +247,104 @@ function parse(){
     if(st.color)styles.push(['color',st.color]);
     if(st.letterSpacing)styles.push(['letter-spacing',st.letterSpacing]);
     if(st.lineHeight)styles.push(['line-height',st.lineHeight]);
+
     node.childNodes.forEach(c=>walk(c,{side,styles}));
   }
+
   clone.childNodes.forEach(c=>walk(c));
-  pages=[[]]; let pi=0, inNarr=false, buf=[], bufSide=null;
+
+  pages=[[]];
+  let pi=0, inStarNarr=false, buf=[], bufType=null, bufSide=null;
+
   function styleText(a){
     let h=esc(a.text);
-    if(a.styles.length){const css=a.styles.map(x=>x[0]+':'+x[1]).join(';');h='<span style="'+css+'">'+h+'</span>'}
+    if(a.styles.length){
+      const css=a.styles.map(x=>x[0]+':'+x[1]).join(';');
+      h='<span style="'+css+'">'+h+'</span>';
+    }
     return h;
   }
+
   function flush(){
     if(!buf.length)return;
     const raw=buf.map(x=>x.text).join('');
-    if(!raw.trim()){buf=[];bufSide=null;return}
-    if(inNarr){
-      let html=buf.map(styleText).join('').trim().replace(/\n/g,'<br>');
-      if(html)pages[pi].push({type:'n',html});
-    }else{
-      let t=raw.trim();
-      if(t)pages[pi].push({type:'d',side:bufSide||'left',text:t});
+
+    if(raw.trim()){
+      if(bufType==='d'){
+        pages[pi].push({type:'d',side:bufSide||'left',text:raw.trim()});
+      }else{
+        const html=buf.map(styleText).join('').trim().replace(/\n/g,'<br>');
+        if(html)pages[pi].push({type:'n',html});
+      }
     }
-    buf=[];bufSide=null;
+
+    buf=[];
+    bufType=null;
+    bufSide=null;
   }
+
+  function pushPiece(text,a){
+    if(!text)return;
+
+    // 별표 안은 항상 지문.
+    // 별표 밖에서도 화자를 직접 지정하지 않은 텍스트는 기본 지문.
+    const type = (!inStarNarr && a.side) ? 'd' : 'n';
+    const side = type==='d' ? a.side : null;
+
+    if(buf.length && (bufType!==type || (type==='d' && bufSide!==side))) flush();
+
+    if(!buf.length){
+      bufType=type;
+      bufSide=side;
+    }
+
+    buf.push({text,styles:a.styles});
+  }
+
   for(const a of atoms){
-    let s=a.text, pos=0;
-    const token='\uE000PAGEBREAK\uE000';
-    const msgtoken='\uE000MSGBREAK\uE000';
-    while(pos<s.length){
-      if(s.startsWith(token,pos)){flush();pages.push([]);pi++;pos+=token.length;continue}
-      if(s.startsWith(msgtoken,pos)){flush();pos+=msgtoken.length;continue}
-      const ch=s[pos];
-      if(ch==='*'){flush();inNarr=!inNarr;pos++;continue}
+    let str=a.text, pos=0;
+    const pageToken='\uE000PAGEBREAK\uE000';
+    const msgToken='\uE000MSGBREAK\uE000';
+
+    while(pos<str.length){
+      if(str.startsWith(pageToken,pos)){
+        flush();
+        pages.push([]);
+        pi++;
+        pos+=pageToken.length;
+        continue;
+      }
+
+      if(str.startsWith(msgToken,pos)){
+        flush();
+        pos+=msgToken.length;
+        continue;
+      }
+
+      if(str[pos]==='*'){
+        flush();
+        inStarNarr=!inStarNarr;
+        pos++;
+        continue;
+      }
+
       let end=pos+1;
-      while(end<s.length && s[end]!=='*' && !s.startsWith(token,end) && !s.startsWith(msgtoken,end))end++;
-      let piece=s.slice(pos,end);
-      if(!inNarr && buf.length && a.side && bufSide && a.side!==bufSide)flush();
-      if(!inNarr && a.side && !bufSide)bufSide=a.side;
-      buf.push({text:piece,styles:a.styles});pos=end;
+      while(
+        end<str.length &&
+        str[end]!=='*' &&
+        !str.startsWith(pageToken,end) &&
+        !str.startsWith(msgToken,end)
+      ) end++;
+
+      pushPiece(str.slice(pos,end),a);
+      pos=end;
     }
   }
+
   flush();
   pages=pages.filter((p,i)=>p.length||pages.length===1);
-  current=Math.min(current,pages.length-1); render();
+  current=Math.min(current,pages.length-1);
+  render();
 }
 $('#convert').onclick=parse;
 
