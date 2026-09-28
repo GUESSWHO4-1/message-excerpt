@@ -1,35 +1,256 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Message Excerpt V2</title>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Message Excerpt V3</title>
 <style>
-:root{--bg:#f5f5f7;--line:#dddde2;--left:#e9e9eb;--right:#0a84ff;--bs:15px}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;color:#17171a}button,input,textarea,select{font:inherit}button{cursor:pointer}.app{max-width:1200px;margin:auto;padding:28px 18px 60px}.head,.actions,.tabs,.tools{display:flex;gap:8px;flex-wrap:wrap}.head{justify-content:space-between;align-items:end;margin-bottom:18px}h1{margin:0;font-size:25px}.sub,.help{color:#85858d;font-size:12px}.layout{display:grid;grid-template-columns:410px 1fr;gap:22px;align-items:start}.preview{position:sticky;top:16px}.tabs{margin-bottom:8px}.tab,.btn{border:1px solid #d6d6db;background:white;border-radius:9px;padding:8px 11px;font-weight:650}.tab.on,.btn.dark{background:#17171a;color:white}.btn.blue{background:#0a84ff;color:white;border-color:#0a84ff}.btn.red{color:#d70015}.phone{background:#fff;border:1px solid #d7d7dc;border-radius:28px;overflow:hidden;box-shadow:0 12px 38px #00000012}.nav{height:55px;border-bottom:1px solid #eee;display:grid;grid-template-columns:45px 1fr 45px;align-items:center;padding:0 10px}.back{font-size:30px;color:#0a84ff}.name{text-align:center;font-size:13px;font-weight:650}.messages{min-height:550px;padding:17px 12px 24px;display:flex;flex-direction:column;gap:6px}.row{display:flex}.left{justify-content:flex-start}.right{justify-content:flex-end}.bubble{max-width:80%;padding:8px 12px;border-radius:18px;font-size:var(--bs);line-height:1.42;white-space:pre-wrap;overflow-wrap:anywhere}.left .bubble{background:var(--left);color:#111;border-bottom-left-radius:5px}.right .bubble{background:var(--right);color:#fff;border-bottom-right-radius:5px}.nar{padding:10px 7px;margin:3px 0;font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}.composer{height:48px;border-top:1px solid #eee;display:flex;gap:7px;align-items:center;padding:8px 10px}.plus,.send{width:29px;height:29px;border-radius:50%;display:grid;place-items:center}.plus{background:#e9e9ed;color:#666;font-size:20px}.send{background:var(--right);color:white}.fake{flex:1;border:1px solid #d5d5da;border-radius:18px;padding:6px 11px;color:#aaa;font-size:13px}.card{background:white;border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:12px}.card h2{font-size:15px;margin:0 0 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}label{display:block;color:#707078;font-size:12px;margin-bottom:5px}input[type=text],input[type=number],textarea,select{width:100%;border:1px solid #d6d6dc;border-radius:10px;padding:9px 10px;background:white}textarea{min-height:105px;resize:vertical}.colors{display:flex;align-items:center;gap:8px}.colors input{width:44px;height:38px;border:0}.editor{min-height:125px;border:1px solid #d6d6dc;border-radius:10px;padding:11px;line-height:1.7;white-space:pre-wrap;outline:none}.tool{height:36px;border:1px solid #d6d6dc;background:white;border-radius:8px;padding:0 10px}.hilite{display:grid;grid-template-columns:45px 1fr 55px auto auto;gap:7px;align-items:center;margin-top:8px}.list{display:flex;flex-direction:column;gap:7px;margin-top:12px}.item{display:grid;grid-template-columns:55px 1fr auto;gap:7px;align-items:center;border:1px solid #ececf0;border-radius:9px;padding:7px}.badge{font-size:11px;background:#f0f0f3;border-radius:7px;padding:5px;text-align:center}.snip{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mini{border:0;border-radius:7px;padding:6px;background:#f0f0f3}.help{line-height:1.55;margin-top:8px}
-@media(max-width:820px){.layout{grid-template-columns:1fr}.preview{position:static}.grid{grid-template-columns:1fr}.full{grid-column:auto}.hilite{grid-template-columns:45px 1fr 55px}.hilite button{grid-column:span 3}}
-</style></head><body><div class="app">
-<div class="head"><div><h1>Message Excerpt V2</h1><div class="sub">*별표 안 = 지문 · 별표 밖 = 대사*</div></div><div class="actions"><button class="btn" id="reset">초기화</button><button class="btn blue" id="png">현재 페이지 PNG</button><button class="btn dark" id="pngAll">전체 페이지 PNG</button></div></div>
-<div class="layout"><aside class="preview"><div class="tabs" id="tabs"></div><div class="phone" id="capture"><div class="nav"><div class="back">‹</div><div class="name"><span id="nameView">강무혁</span> ›</div><div></div></div><div class="messages" id="messages"></div><div class="composer"><div class="plus">＋</div><div class="fake">iMessage</div><div class="send">↑</div></div></div></aside>
-<main>
-<section class="card"><h2>화면 설정</h2><div class="grid"><div><label>상대 이름</label><input id="name" type="text" value="강무혁"></div><div><label>말풍선 글씨 크기 (10–32px)</label><input id="bsize" type="number" min="10" max="32" value="15"></div><div><label>상대 말풍선 색</label><div class="colors"><input id="lc" type="color" value="#e9e9eb"><span id="lhex"></span></div></div><div><label>내 말풍선 색</label><div class="colors"><input id="rc" type="color" value="#0a84ff"><span id="rhex"></span></div></div></div></section>
-<section class="card"><h2>원문 자동 변환</h2><div class="grid"><div><label>별표 밖 대사 화자</label><select id="pside"><option value="left">상대 · 왼쪽</option><option value="right">나 · 오른쪽</option></select></div><div></div><div class="full"><label>원문</label><textarea id="raw" placeholder="왜 전화 안 받았어? *담배를 끄며 미간을 좁힌다.* 어디야."></textarea></div></div><div class="actions"><button class="btn dark" id="parse">자동 분리해서 추가</button></div><div class="help">별표 안은 지문, 별표 밖은 대사로 순서대로 분리되고 별표 자체는 사라져.</div></section>
-<section class="card"><h2>대사 직접 추가</h2><div class="grid"><div><label>화자</label><select id="dside"><option value="left">상대 · 왼쪽</option><option value="right">나 · 오른쪽</option></select></div><div></div><div class="full"><label>대사</label><textarea id="dialogue"></textarea></div></div><div class="actions"><button class="btn dark" id="addD">대사 추가</button></div></section>
-<section class="card"><h2>지문 직접 추가</h2><div class="tools"><button class="tool" id="bold"><b>B</b></button><button class="tool" id="italic"><i>I</i></button><select id="fs" style="width:auto"><option value="">글씨 크기</option><option>11</option><option>12</option><option>13</option><option>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>28</option></select><button class="tool" id="sizeApply">적용</button></div><div id="editor" class="editor" contenteditable="true"></div><div class="hilite"><input id="hc" type="color" value="#fff176"><input id="ho" type="range" min="0" max="100" value="45"><span id="hop">45%</span><button class="btn" id="paint">선택 부분 칠하기</button><button class="btn" id="erase">형광펜 지우기</button></div><div class="actions"><button class="btn dark" id="addN">지문 추가</button></div><div class="help">지문에서 원하는 부분을 드래그한 뒤 굵게·기울임·크기·형광펜을 적용할 수 있어.</div></section>
-<section class="card"><h2>페이지 & 내용 관리</h2><div class="actions"><button class="btn blue" id="newPage">페이지 나누기</button><button class="btn red" id="clear">현재 페이지 비우기</button></div><div class="help">페이지 나누기를 누르면 새 iMessage 화면이 생겨. PAGE 버튼으로 이동할 수 있어.</div><div class="list" id="list"></div></section>
-</main></div></div>
+:root{--bg:#f5f5f7;--line:#dddde2;--left:#e9e9eb;--right:#0a84ff;--bs:15px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;color:#17171a}
+button,input,select{font:inherit} button{cursor:pointer}
+.app{max-width:1280px;margin:auto;padding:26px 18px 60px}
+.head{display:flex;justify-content:space-between;gap:12px;align-items:end;margin-bottom:18px;flex-wrap:wrap}
+h1{margin:0;font-size:25px}.sub,.help{font-size:12px;color:#85858d}.actions,.toolbar,.tabs{display:flex;gap:7px;flex-wrap:wrap}
+.layout{display:grid;grid-template-columns:410px 1fr;gap:22px;align-items:start}
+.preview{position:sticky;top:16px}.phone{background:#fff;border:1px solid #d7d7dc;border-radius:28px;overflow:hidden;box-shadow:0 12px 38px #00000012}
+.nav{height:55px;border-bottom:1px solid #eee;display:grid;grid-template-columns:45px 1fr 45px;align-items:center;padding:0 10px}
+.back{font-size:30px;color:#0a84ff}.name{text-align:center;font-size:13px;font-weight:650}
+
+.messages{min-height:550px;padding:17px 12px 24px;display:flex;flex-direction:column;gap:6px}
+.row{display:flex}.left{justify-content:flex-start}.right{justify-content:flex-end}
+.bubble{max-width:80%;padding:8px 12px;border-radius:18px;font-size:var(--bs);line-height:1.42;white-space:pre-wrap;overflow-wrap:anywhere}
+.left .bubble{background:var(--left);color:#111;border-bottom-left-radius:5px}.right .bubble{background:var(--right);color:#fff;border-bottom-right-radius:5px}
+.nar{padding:10px 7px;margin:3px 0;font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.composer{height:48px;border-top:1px solid #eee;display:flex;gap:7px;align-items:center;padding:8px 10px}
+.plus,.send{width:29px;height:29px;border-radius:50%;display:grid;place-items:center}.plus{background:#e9e9ed;color:#666;font-size:20px}.send{background:var(--right);color:#fff}
+.fake{flex:1;border:1px solid #d5d5da;border-radius:18px;padding:6px 11px;color:#aaa;font-size:13px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:12px}.card h2{font-size:15px;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}label{display:block;color:#707078;font-size:12px;margin-bottom:5px}
+input[type=text],input[type=number],select{width:100%;border:1px solid #d6d6dc;border-radius:10px;padding:9px 10px;background:#fff}
+.colors{display:flex;align-items:center;gap:8px}.colors input{width:44px;height:38px;border:0}
+.btn,.tool,.tab{border:1px solid #d6d6db;background:#fff;border-radius:9px;padding:8px 11px;font-weight:650}.btn.dark,.tab.on{background:#17171a;color:#fff}.btn.blue{background:#0a84ff;color:#fff;border-color:#0a84ff}.btn.red{color:#d70015}
+.editor{min-height:290px;border:1px solid #d6d6dc;border-radius:12px;padding:14px;line-height:1.8;white-space:pre-wrap;outline:none;background:#fff;overflow-wrap:anywhere}
+.editor:empty:before{content:"AI 채팅 원문을 여기에 붙여넣어.  *별표 안은 지문*, 별표 밖은 대사로 변환돼.";color:#aaa}
+.speaker-left{background:rgba(142,142,147,.17);border-radius:4px;box-shadow:inset 0 -2px 0 #8e8e93}
+.speaker-right{background:rgba(10,132,255,.13);border-radius:4px;box-shadow:inset 0 -2px 0 #0a84ff}
+.pagebreak{display:block;margin:10px 0;border:0;border-top:1px dashed #aaa;position:relative;height:18px}
+.pagebreak:after{content:"PAGE BREAK";position:absolute;left:50%;top:-9px;transform:translateX(-50%);background:#fff;padding:0 8px;color:#888;font-size:10px}
+.sep{width:1px;background:#ddd;margin:0 2px}.toolbar{align-items:center;margin-bottom:9px}.tool{padding:7px 9px}
+.toolbar input[type=color]{width:38px;height:34px;border:0;background:transparent}.toolbar input[type=range]{width:110px}.toolbar select{width:auto;padding:7px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 0;font-size:11px;color:#777}.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}.dl{background:#8e8e932b;border-bottom:2px solid #8e8e93}.dr{background:#0a84ff21;border-bottom:2px solid #0a84ff}
+.tabs{margin-bottom:8px}.help{line-height:1.55;margin-top:8px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.preview{position:static}.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="head">
+    <div><h1>Message Excerpt V3</h1><div class="sub">원문 하나로 대사 · 지문 · 화자 · 서식 · 페이지를 편집</div></div>
+    <div class="actions"><button class="btn" id="reset">초기화</button><button class="btn blue" id="png">현재 페이지 PNG</button><button class="btn dark" id="pngAll">전체 페이지 PNG</button></div>
+  </div>
+
+  <div class="layout">
+    <aside class="preview">
+      <div class="tabs" id="tabs"></div>
+      <div class="phone" id="capture">
+        <div class="nav"><div class="back">‹</div><div class="name"><span id="nameView">강무혁</span></div><div></div></div>
+        <div class="messages" id="messages"></div>
+        <div class="composer"><div class="plus">＋</div><div class="fake">iMessage</div><div class="send">↑</div></div>
+      </div>
+    </aside>
+
+    <main>
+      <section class="card">
+        <h2>화면 설정</h2>
+        <div class="grid">
+          <div><label>상대 이름</label><input id="name" type="text" value="강무혁"></div>
+          <div><label>말풍선 글씨 크기 (10–32px)</label><input id="bsize" type="number" min="10" max="32" value="15"></div>
+          <div><label>상대 말풍선 색</label><div class="colors"><input id="lc" type="color" value="#e9e9eb"><span id="lhex">#E9E9EB</span></div></div>
+          <div><label>내 말풍선 색</label><div class="colors"><input id="rc" type="color" value="#0a84ff"><span id="rhex">#0A84FF</span></div></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>원문 편집기</h2>
+        <div class="toolbar">
+          <button class="tool" id="leftMark">← 상대 말풍선</button>
+          <button class="tool" id="rightMark">내 말풍선 →</button>
+          <span class="sep">&nbsp;</span>
+          <button class="tool" id="bold"><b>B</b></button>
+          <button class="tool" id="italic"><i>I</i></button><input id="tc" type="color" value="#17171a" title="글씨 색"><button class="tool" id="textColor">글씨색</button>
+          <select id="fs"><option value="">글씨 크기</option><option>11</option><option>12</option><option>13</option><option>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>28</option></select>
+          <button class="tool" id="sizeApply">적용</button>
+          <span class="sep">&nbsp;</span>
+          <input id="hc" type="color" value="#fff176" title="형광펜 색">
+          <input id="ho" type="range" min="0" max="100" value="45" title="형광펜 투명도">
+          <span id="hop">45%</span>
+          <button class="tool" id="paint">칠하기</button>
+          <button class="tool" id="erase">형광펜 지우기</button>
+          <span class="sep">&nbsp;</span>
+          <button class="tool" id="break">페이지 나누기</button>
+        </div>
+        <div id="editor" class="editor" contenteditable="true" spellcheck="false"></div>
+        <div class="legend"><span><i class="dot dl"></i>상대 대사 지정</span><span><i class="dot dr"></i>내 대사 지정</span><span>*별표 안 = 지문 / 별표 밖 = 대사</span></div>
+        <div class="actions" style="margin-top:12px"><button class="btn dark" id="convert">미리보기 변환</button></div>
+        <div class="help">AI 채팅을 그대로 붙여넣고 대사 부분을 드래그해 좌/우를 지정해. 지정하지 않은 대사는 기본적으로 상대(왼쪽)로 들어가. 지문 서식은 별표 안에 적용한 서식만 결과에 반영돼.</div>
+      </section>
+    </main>
+  </div>
+</div>
+
 <script>
-const $=s=>document.querySelector(s),root=document.documentElement,S={p:0,pages:[[]]};const pg=()=>S.pages[S.p];
+const $=s=>document.querySelector(s), root=document.documentElement, E=$('#editor');
+let pages=[[]], current=0, savedRange=null;
+
 function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function clean(h){let t=document.createElement('template');t.innerHTML=h;t.content.querySelectorAll('script,style,iframe,object').forEach(x=>x.remove());t.content.querySelectorAll('*').forEach(e=>[...e.attributes].forEach(a=>{if(a.name!=='style')e.removeAttribute(a.name);else{let ok=[];for(let p of e.style)if(['font-weight','font-style','font-size','background-color'].includes(p))ok.push(p+':'+e.style.getPropertyValue(p));ok.length?e.setAttribute('style',ok.join(';')):e.removeAttribute('style')}}));return t.innerHTML}
-function txt(h){let d=document.createElement('div');d.innerHTML=h;return d.textContent||''}
-function render(){let tabs=$('#tabs');tabs.innerHTML='';S.pages.forEach((x,i)=>{let b=document.createElement('button');b.className='tab'+(i===S.p?' on':'');b.textContent='PAGE '+(i+1);b.onclick=()=>{S.p=i;render()};tabs.append(b)});let m=$('#messages');m.innerHTML='';pg().forEach(x=>{if(x.type==='d'){let r=document.createElement('div');r.className='row '+x.side;let b=document.createElement('div');b.className='bubble';b.textContent=x.text;r.append(b);m.append(r)}else{let n=document.createElement('div');n.className='nar';n.innerHTML=clean(x.html);m.append(n)}});let l=$('#list');l.innerHTML='';pg().forEach((x,i)=>{let e=document.createElement('div');e.className='item';let a=document.createElement('div');a.className='badge';a.textContent=x.type==='n'?'지문':x.side==='left'?'상대':'나';let s=document.createElement('div');s.className='snip';s.textContent=x.type==='n'?txt(x.html):x.text;let c=document.createElement('div');['↑','↓','삭제'].forEach((q,j)=>{let b=document.createElement('button');b.className='mini';b.textContent=q;b.onclick=()=>{if(j===0&&i>0){[pg()[i-1],pg()[i]]=[pg()[i],pg()[i-1]]}else if(j===1&&i<pg().length-1){[pg()[i+1],pg()[i]]=[pg()[i],pg()[i+1]]}else if(j===2)pg().splice(i,1);render()};c.append(b)});e.append(a,s,c);l.append(e)})}
-function settings(){let z=Math.max(10,Math.min(32,+$('#bsize').value||15));root.style.setProperty('--bs',z+'px');root.style.setProperty('--left',$('#lc').value);root.style.setProperty('--right',$('#rc').value);$('#nameView').textContent=$('#name').value.trim()||'상대';$('#lhex').textContent=$('#lc').value.toUpperCase();$('#rhex').textContent=$('#rc').value.toUpperCase()}
-['name','bsize','lc','rc'].forEach(id=>$('#'+id).oninput=settings);
-$('#parse').onclick=()=>{let raw=$('#raw').value;if(!raw.trim())return,0;let side=$('#pside').value,re=/\*([\s\S]*?)\*/g,last=0,m;while((m=re.exec(raw))){let d=raw.slice(last,m.index).trim();if(d)pg().push({type:'d',side,text:d});let n=m[1].trim();if(n)pg().push({type:'n',html:esc(n).replace(/\n/g,'<br>')});last=re.lastIndex}let d=raw.slice(last).trim();if(d)pg().push({type:'d',side,text:d});$('#raw').value='';render()};
-$('#addD').onclick=()=>{let t=$('#dialogue').value.trim();if(t){pg().push({type:'d',side:$('#dside').value,text:t});$('#dialogue').value='';render()}};
-let R=null,E=$('#editor');function saveSel(){let s=getSelection();if(s.rangeCount&&E.contains(s.anchorNode))R=s.getRangeAt(0).cloneRange()}E.onmouseup=saveSel;E.onkeyup=saveSel;
-function wrap(st){if(!R)return;let s=getSelection();s.removeAllRanges();s.addRange(R);if(s.isCollapsed)return;let r=s.getRangeAt(0),sp=document.createElement('span');Object.assign(sp.style,st);try{r.surroundContents(sp)}catch{let f=r.extractContents();sp.append(f);r.insertNode(sp)}s.removeAllRanges();R=null;E.focus()}
-['bold','italic','sizeApply','paint','erase'].forEach(id=>$('#'+id).onmousedown=e=>e.preventDefault());
-$('#bold').onclick=()=>wrap({fontWeight:'700'});$('#italic').onclick=()=>wrap({fontStyle:'italic'});$('#sizeApply').onclick=()=>{if($('#fs').value)wrap({fontSize:$('#fs').value+'px'})};$('#ho').oninput=()=>$('#hop').textContent=$('#ho').value+'%';
-$('#paint').onclick=()=>{let h=$('#hc').value,o=+$('#ho').value/100,r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);wrap({backgroundColor:`rgba(${r},${g},${b},${o})`})};$('#erase').onclick=()=>wrap({backgroundColor:'transparent'});
-$('#addN').onclick=()=>{let h=clean(E.innerHTML);if(txt(h).trim()){pg().push({type:'n',html:h});E.innerHTML='';render()}};
-$('#newPage').onclick=()=>{S.pages.splice(S.p+1,0,[]);S.p++;render()};$('#clear').onclick=()=>{S.pages[S.p]=[];render()};$('#reset').onclick=()=>{if(confirm('모든 내용을 초기화할까?')){S.pages=[[]];S.p=0;render()}};
-async function shot(name){let mod=await import('https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/+esm'),u=await mod.toPng($('#capture'),{pixelRatio:3,backgroundColor:'#fff'}),a=document.createElement('a');a.href=u;a.download=name;a.click()}
-$('#png').onclick=async()=>{try{await shot(`message-page-${S.p+1}.png`)}catch{alert('PNG 저장에 실패했어.')}};$('#pngAll').onclick=async()=>{let o=S.p;try{for(let i=0;i<S.pages.length;i++){S.p=i;render();await new Promise(r=>setTimeout(r,100));await shot(`message-page-${i+1}.png`);await new Promise(r=>setTimeout(r,250))}}catch{alert('브라우저에서 여러 다운로드 허용을 확인해 줘.')}S.p=o;render()};
+function sanitize(h){
+  const t=document.createElement('template'); t.innerHTML=h;
+  t.content.querySelectorAll('script,style,iframe,object').forEach(x=>x.remove());
+  t.content.querySelectorAll('*').forEach(e=>{
+    [...e.attributes].forEach(a=>{
+      if(a.name==='class' && ['speaker-left','speaker-right','pagebreak'].some(c=>e.classList.contains(c))) return;
+      if(a.name==='style'){
+        let ok=[];
+        for(const p of e.style) if(['font-weight','font-style','font-size','background-color','color'].includes(p)) ok.push(p+':'+e.style.getPropertyValue(p));
+        ok.length?e.setAttribute('style',ok.join(';')):e.removeAttribute('style');
+      } else if(a.name!=='class') e.removeAttribute(a.name);
+    });
+  });
+  return t.innerHTML;
+}
+function textOf(h){const d=document.createElement('div');d.innerHTML=h;return d.textContent||''}
+function settings(){
+  root.style.setProperty('--bs',Math.max(10,Math.min(32,+$('#bsize').value||15))+'px');
+  root.style.setProperty('--left',$('#lc').value); root.style.setProperty('--right',$('#rc').value);
+  $('#nameView').textContent=$('#name').value.trim()||'상대';
+  $('#lhex').textContent=$('#lc').value.toUpperCase(); $('#rhex').textContent=$('#rc').value.toUpperCase();
+}
+['name','bsize','lc','rc'].forEach(id=>$('#'+id).addEventListener('input',settings));
+
+function saveSelection(){
+  const s=getSelection();
+  if(s.rangeCount && E.contains(s.anchorNode) && E.contains(s.focusNode)) savedRange=s.getRangeAt(0).cloneRange();
+}
+E.addEventListener('mouseup',saveSelection); E.addEventListener('keyup',saveSelection);
+
+function useRange(){
+  if(!savedRange || savedRange.collapsed) return null;
+  const s=getSelection(); s.removeAllRanges(); s.addRange(savedRange); return s.getRangeAt(0);
+}
+function wrapSelection(className,styles){
+  const r=useRange(); if(!r) return;
+  const sp=document.createElement('span'); if(className) sp.className=className; if(styles) Object.assign(sp.style,styles);
+  try{r.surroundContents(sp)}catch(e){const f=r.extractContents();sp.appendChild(f);r.insertNode(sp)}
+  getSelection().removeAllRanges(); savedRange=null; E.focus();
+}
+document.querySelectorAll('.tool').forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
+$('#leftMark').onclick=()=>wrapSelection('speaker-left');
+$('#rightMark').onclick=()=>wrapSelection('speaker-right');
+$('#bold').onclick=()=>wrapSelection('',{fontWeight:'700'});
+$('#italic').onclick=()=>wrapSelection('',{fontStyle:'italic'});
+$('#textColor').onclick=()=>wrapSelection('',{color:$('#tc').value});
+$('#sizeApply').onclick=()=>{if($('#fs').value)wrapSelection('',{fontSize:$('#fs').value+'px'})};
+$('#ho').oninput=()=>$('#hop').textContent=$('#ho').value+'%';
+$('#paint').onclick=()=>{
+  const h=$('#hc').value,o=+$('#ho').value/100;
+  const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);
+  wrapSelection('',{backgroundColor:`rgba(${r}, ${g}, ${b}, ${o})`});
+};
+$('#erase').onclick=()=>wrapSelection('',{backgroundColor:'transparent'});
+$('#break').onclick=()=>{
+  let r=useRange();
+  if(!r){E.focus();r=document.createRange();r.selectNodeContents(E);r.collapse(false)}
+  r.deleteContents();
+  const br=document.createElement('span');br.className='pagebreak';br.contentEditable='false';br.innerHTML='&nbsp;';
+  r.insertNode(br); r.setStartAfter(br);r.collapse(true);
+  const s=getSelection();s.removeAllRanges();s.addRange(r);savedRange=r.cloneRange();
+};
+
+function serializeEditor(){
+  const clone=E.cloneNode(true);
+  clone.querySelectorAll('.pagebreak').forEach(x=>x.replaceWith(document.createTextNode('\n\uE000PAGEBREAK\uE000\n')));
+  clone.querySelectorAll('div').forEach(d=>{d.insertAdjacentText('beforebegin','\n');d.insertAdjacentText('afterend','\n')});
+  clone.querySelectorAll('br').forEach(b=>b.replaceWith(document.createTextNode('\n')));
+  return clone;
+}
+function parse(){
+  const clone=serializeEditor();
+  const atoms=[];
+  function walk(node,ctx={side:null,styles:[]}){
+    if(node.nodeType===3){if(node.nodeValue)atoms.push({text:node.nodeValue,side:ctx.side,styles:[...ctx.styles]});return}
+    if(node.nodeType!==1)return;
+    let side=ctx.side;
+    if(node.classList.contains('speaker-left'))side='left';
+    if(node.classList.contains('speaker-right'))side='right';
+    let styles=[...ctx.styles];
+    const st=node.style;
+    if(st.fontWeight)styles.push(['font-weight',st.fontWeight]);
+    if(st.fontStyle)styles.push(['font-style',st.fontStyle]);
+    if(st.fontSize)styles.push(['font-size',st.fontSize]);
+    if(st.backgroundColor)styles.push(['background-color',st.backgroundColor]);
+    if(st.color)styles.push(['color',st.color]);
+    node.childNodes.forEach(c=>walk(c,{side,styles}));
+  }
+  clone.childNodes.forEach(c=>walk(c));
+  pages=[[]]; let pi=0, inNarr=false, buf=[], bufSide=null;
+  function styleText(a){
+    let h=esc(a.text);
+    if(a.styles.length){const css=a.styles.map(x=>x[0]+':'+x[1]).join(';');h='<span style="'+css+'">'+h+'</span>'}
+    return h;
+  }
+  function flush(){
+    if(!buf.length)return;
+    const raw=buf.map(x=>x.text).join('');
+    if(!raw.trim()){buf=[];bufSide=null;return}
+    if(inNarr){
+      let html=buf.map(styleText).join('').trim().replace(/\n/g,'<br>');
+      if(html)pages[pi].push({type:'n',html});
+    }else{
+      let t=raw.trim();
+      if(t)pages[pi].push({type:'d',side:bufSide||'left',text:t});
+    }
+    buf=[];bufSide=null;
+  }
+  for(const a of atoms){
+    let s=a.text, pos=0;
+    const token='\uE000PAGEBREAK\uE000';
+    while(pos<s.length){
+      if(s.startsWith(token,pos)){flush();pages.push([]);pi++;pos+=token.length;continue}
+      const ch=s[pos];
+      if(ch==='*'){flush();inNarr=!inNarr;pos++;continue}
+      let end=pos+1;
+      while(end<s.length && s[end]!=='*' && !s.startsWith(token,end))end++;
+      let piece=s.slice(pos,end);
+      if(!inNarr && buf.length && a.side && bufSide && a.side!==bufSide)flush();
+      if(!inNarr && a.side && !bufSide)bufSide=a.side;
+      buf.push({text:piece,styles:a.styles});pos=end;
+    }
+  }
+  flush();
+  pages=pages.filter((p,i)=>p.length||pages.length===1);
+  current=Math.min(current,pages.length-1); render();
+}
+$('#convert').onclick=parse;
+
+function render(){
+  const tabs=$('#tabs');tabs.innerHTML='';
+  pages.forEach((p,i)=>{const b=document.createElement('button');b.className='tab'+(i===current?' on':'');b.textContent='PAGE '+(i+1);b.onclick=()=>{current=i;render()};tabs.appendChild(b)});
+  const m=$('#messages');m.innerHTML='';
+  (pages[current]||[]).forEach(x=>{
+    if(x.type==='d'){const r=document.createElement('div');r.className='row '+x.side;const b=document.createElement('div');b.className='bubble';b.textContent=x.text;r.appendChild(b);m.appendChild(r)}
+    else{const n=document.createElement('div');n.className='nar';n.innerHTML=sanitize(x.html);m.appendChild(n)}
+  });
+}
+$('#reset').onclick=()=>{if(confirm('편집 내용과 미리보기를 모두 초기화할까?')){E.innerHTML='';pages=[[]];current=0;render()}};
+
+async function shot(name){
+  const mod=await import('https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/+esm');
+  const u=await mod.toPng($('#capture'),{pixelRatio:3,backgroundColor:'#fff'});
+  const a=document.createElement('a');a.href=u;a.download=name;a.click();
+}
+$('#png').onclick=async()=>{try{await shot('message-page-'+(current+1)+'.png')}catch(e){alert('PNG 저장에 실패했어. 인터넷 연결 상태를 확인해 줘.')}};
+$('#pngAll').onclick=async()=>{const old=current;try{for(let i=0;i<pages.length;i++){current=i;render();await new Promise(r=>setTimeout(r,120));await shot('message-page-'+(i+1)+'.png');await new Promise(r=>setTimeout(r,250))}}catch(e){alert('브라우저에서 여러 파일 다운로드를 허용해 줘.')}current=old;render()};
 settings();render();
-</script></body></html>
+</script>
+</body></html>
