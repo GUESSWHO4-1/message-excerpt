@@ -34,7 +34,7 @@ input[type=text],input[type=number],select{width:100%;border:1px solid #d6d6dc;b
 .editor:empty:before{content:"AI 채팅 원문을 여기에 붙여넣어.  *별표 안은 지문*, 별표 밖은 대사로 변환돼.";color:#aaa}
 .speaker-left{background:rgba(142,142,147,.17);border-radius:4px;box-shadow:inset 0 -2px 0 #8e8e93}
 .speaker-right{background:rgba(10,132,255,.13);border-radius:4px;box-shadow:inset 0 -2px 0 #0a84ff}
-.pagebreak{display:block;margin:10px 0;border:0;border-top:1px dashed #aaa;position:relative;height:18px}
+.msgbreak{display:inline-block;width:0;height:1.1em;border-left:2px solid #ff9500;margin:0 5px;vertical-align:middle}.pagebreak{display:block;margin:10px 0;border:0;border-top:1px dashed #aaa;position:relative;height:18px}
 .pagebreak:after{content:"PAGE BREAK";position:absolute;left:50%;top:-9px;transform:translateX(-50%);background:#fff;padding:0 8px;color:#888;font-size:10px}
 .sep{width:1px;background:#ddd;margin:0 2px}.toolbar{align-items:center;margin-bottom:9px}.tool{padding:7px 9px}
 .toolbar input[type=color]{width:38px;height:34px;border:0;background:transparent}.toolbar input[type=range]{width:110px}.toolbar select{width:auto;padding:7px}
@@ -76,11 +76,16 @@ input[type=text],input[type=number],select{width:100%;border:1px solid #d6d6dc;b
         <div class="toolbar">
           <button class="tool" id="leftMark">← 상대 말풍선</button>
           <button class="tool" id="rightMark">내 말풍선 →</button>
+          <button class="tool" id="msgBreak">말풍선 나누기</button>
           <span class="sep">&nbsp;</span>
           <button class="tool" id="bold"><b>B</b></button>
           <button class="tool" id="italic"><i>I</i></button><input id="tc" type="color" value="#17171a" title="글씨 색"><button class="tool" id="textColor">글씨색</button>
-          <select id="fs"><option value="">글씨 크기</option><option>11</option><option>12</option><option>13</option><option>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>28</option></select>
+          <select id="fs"><option value="">글씨 크기</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>28</option></select>
           <button class="tool" id="sizeApply">적용</button>
+          <select id="ls" title="자간"><option value="">자간</option><option value="-1">-1px</option><option value="-0.5">-0.5px</option><option value="0">0px</option><option value="0.5">0.5px</option><option value="1">1px</option><option value="1.5">1.5px</option><option value="2">2px</option><option value="3">3px</option></select>
+          <button class="tool" id="letterApply">자간 적용</button>
+          <select id="lh" title="줄간격"><option value="">줄간격</option><option value="1.1">1.1</option><option value="1.2">1.2</option><option value="1.3">1.3</option><option value="1.4">1.4</option><option value="1.5">1.5</option><option value="1.6">1.6</option><option value="1.8">1.8</option><option value="2">2.0</option><option value="2.2">2.2</option></select>
+          <button class="tool" id="lineApply">줄간격 적용</button>
           <span class="sep">&nbsp;</span>
           <input id="hc" type="color" value="#fff176" title="형광펜 색">
           <input id="ho" type="range" min="0" max="100" value="45" title="형광펜 투명도">
@@ -93,7 +98,7 @@ input[type=text],input[type=number],select{width:100%;border:1px solid #d6d6dc;b
         <div id="editor" class="editor" contenteditable="true" spellcheck="false"></div>
         <div class="legend"><span><i class="dot dl"></i>상대 대사 지정</span><span><i class="dot dr"></i>내 대사 지정</span><span>*별표 안 = 지문 / 별표 밖 = 대사</span></div>
         <div class="actions" style="margin-top:12px"><button class="btn dark" id="convert">미리보기 변환</button></div>
-        <div class="help">AI 채팅을 그대로 붙여넣고 대사 부분을 드래그해 좌/우를 지정해. 지정하지 않은 대사는 기본적으로 상대(왼쪽)로 들어가. 지문 서식은 별표 안에 적용한 서식만 결과에 반영돼.</div>
+        <div class="help">AI 채팅을 그대로 붙여넣고 대사 부분을 드래그해 좌/우를 지정해. 지정하지 않은 대사는 기본적으로 상대(왼쪽)로 들어가. 지문 서식은 별표 안에 적용한 서식만 결과에 반영돼. 자간은 글자 사이 간격, 줄간격은 같은 지문 안의 다음 줄과의 거리를 조절해. 대사를 두 개의 연속 말풍선으로 만들고 싶으면 둘 사이에 커서를 두고 ‘말풍선 나누기’를 눌러.</div>
       </section>
     </main>
   </div>
@@ -112,7 +117,7 @@ function sanitize(h){
       if(a.name==='class' && ['speaker-left','speaker-right','pagebreak'].some(c=>e.classList.contains(c))) return;
       if(a.name==='style'){
         let ok=[];
-        for(const p of e.style) if(['font-weight','font-style','font-size','background-color','color'].includes(p)) ok.push(p+':'+e.style.getPropertyValue(p));
+        for(const p of e.style) if(['font-weight','font-style','font-size','background-color','color','letter-spacing','line-height'].includes(p)) ok.push(p+':'+e.style.getPropertyValue(p));
         ok.length?e.setAttribute('style',ok.join(';')):e.removeAttribute('style');
       } else if(a.name!=='class') e.removeAttribute(a.name);
     });
@@ -151,6 +156,8 @@ $('#bold').onclick=()=>wrapSelection('',{fontWeight:'700'});
 $('#italic').onclick=()=>wrapSelection('',{fontStyle:'italic'});
 $('#textColor').onclick=()=>wrapSelection('',{color:$('#tc').value});
 $('#sizeApply').onclick=()=>{if($('#fs').value)wrapSelection('',{fontSize:$('#fs').value+'px'})};
+$('#letterApply').onclick=()=>{if($('#ls').value!=='')wrapSelection('',{letterSpacing:$('#ls').value+'px'})};
+$('#lineApply').onclick=()=>{if($('#lh').value!=='')wrapSelection('',{lineHeight:$('#lh').value})};
 $('#ho').oninput=()=>$('#hop').textContent=$('#ho').value+'%';
 $('#paint').onclick=()=>{
   const h=$('#hc').value,o=+$('#ho').value/100;
@@ -158,6 +165,19 @@ $('#paint').onclick=()=>{
   wrapSelection('',{backgroundColor:`rgba(${r}, ${g}, ${b}, ${o})`});
 };
 $('#erase').onclick=()=>wrapSelection('',{backgroundColor:'transparent'});
+
+$('#msgBreak').onclick=()=>{
+  let r=null;
+  const sel=getSelection();
+  if(sel.rangeCount && E.contains(sel.anchorNode)){r=sel.getRangeAt(0).cloneRange();}
+  else if(savedRange){r=savedRange.cloneRange();}
+  if(!r){E.focus();r=document.createRange();r.selectNodeContents(E);r.collapse(false)}
+  r.deleteContents();
+  const mb=document.createElement('span');mb.className='msgbreak';mb.contentEditable='false';mb.innerHTML='&nbsp;';
+  r.insertNode(mb);r.setStartAfter(mb);r.collapse(true);
+  const ss=getSelection();ss.removeAllRanges();ss.addRange(r);savedRange=r.cloneRange();
+};
+
 $('#break').onclick=()=>{
   let r=useRange();
   if(!r){E.focus();r=document.createRange();r.selectNodeContents(E);r.collapse(false)}
@@ -170,6 +190,7 @@ $('#break').onclick=()=>{
 function serializeEditor(){
   const clone=E.cloneNode(true);
   clone.querySelectorAll('.pagebreak').forEach(x=>x.replaceWith(document.createTextNode('\n\uE000PAGEBREAK\uE000\n')));
+  clone.querySelectorAll('.msgbreak').forEach(x=>x.replaceWith(document.createTextNode('\uE000MSGBREAK\uE000')));
   clone.querySelectorAll('div').forEach(d=>{d.insertAdjacentText('beforebegin','\n');d.insertAdjacentText('afterend','\n')});
   clone.querySelectorAll('br').forEach(b=>b.replaceWith(document.createTextNode('\n')));
   return clone;
@@ -190,6 +211,8 @@ function parse(){
     if(st.fontSize)styles.push(['font-size',st.fontSize]);
     if(st.backgroundColor)styles.push(['background-color',st.backgroundColor]);
     if(st.color)styles.push(['color',st.color]);
+    if(st.letterSpacing)styles.push(['letter-spacing',st.letterSpacing]);
+    if(st.lineHeight)styles.push(['line-height',st.lineHeight]);
     node.childNodes.forEach(c=>walk(c,{side,styles}));
   }
   clone.childNodes.forEach(c=>walk(c));
@@ -215,12 +238,14 @@ function parse(){
   for(const a of atoms){
     let s=a.text, pos=0;
     const token='\uE000PAGEBREAK\uE000';
+    const msgtoken='\uE000MSGBREAK\uE000';
     while(pos<s.length){
       if(s.startsWith(token,pos)){flush();pages.push([]);pi++;pos+=token.length;continue}
+      if(s.startsWith(msgtoken,pos)){flush();pos+=msgtoken.length;continue}
       const ch=s[pos];
       if(ch==='*'){flush();inNarr=!inNarr;pos++;continue}
       let end=pos+1;
-      while(end<s.length && s[end]!=='*' && !s.startsWith(token,end))end++;
+      while(end<s.length && s[end]!=='*' && !s.startsWith(token,end) && !s.startsWith(msgtoken,end))end++;
       let piece=s.slice(pos,end);
       if(!inNarr && buf.length && a.side && bufSide && a.side!==bufSide)flush();
       if(!inNarr && a.side && !bufSide)bufSide=a.side;
@@ -246,8 +271,27 @@ $('#reset').onclick=()=>{if(confirm('편집 내용과 미리보기를 모두 초
 
 async function shot(name){
   const mod=await import('https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/+esm');
-  const u=await mod.toPng($('#capture'),{pixelRatio:3,backgroundColor:'#fff'});
-  const a=document.createElement('a');a.href=u;a.download=name;a.click();
+  const target=$('#capture');
+  const oldRadius=target.style.borderRadius;
+  const oldBorder=target.style.border;
+  const oldShadow=target.style.boxShadow;
+  const oldOverflow=target.style.overflow;
+
+  // 저장할 때만 '폰 목업' 테두리를 제거해서 화면이 PNG 가장자리까지 꽉 차게 함.
+  target.style.borderRadius='0';
+  target.style.border='0';
+  target.style.boxShadow='none';
+  target.style.overflow='hidden';
+
+  try{
+    const u=await mod.toPng(target,{pixelRatio:3,backgroundColor:'#fff'});
+    const a=document.createElement('a');a.href=u;a.download=name;a.click();
+  } finally {
+    target.style.borderRadius=oldRadius;
+    target.style.border=oldBorder;
+    target.style.boxShadow=oldShadow;
+    target.style.overflow=oldOverflow;
+  }
 }
 $('#png').onclick=async()=>{try{await shot('message-page-'+(current+1)+'.png')}catch(e){alert('PNG 저장에 실패했어. 인터넷 연결 상태를 확인해 줘.')}};
 $('#pngAll').onclick=async()=>{const old=current;try{for(let i=0;i<pages.length;i++){current=i;render();await new Promise(r=>setTimeout(r,120));await shot('message-page-'+(i+1)+'.png');await new Promise(r=>setTimeout(r,250))}}catch(e){alert('브라우저에서 여러 파일 다운로드를 허용해 줘.')}current=old;render()};
