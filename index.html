@@ -169,13 +169,24 @@ E.addEventListener('paste',e=>{
 
 function useRange(){
   if(!savedRange || savedRange.collapsed) return null;
+  if(!E.contains(savedRange.commonAncestorContainer)) return null;
+  E.focus({preventScroll:true});
   const s=getSelection(); s.removeAllRanges(); s.addRange(savedRange); return s.getRangeAt(0);
 }
 function wrapSelection(className,styles){
   const r=useRange(); if(!r) return;
   const sp=document.createElement('span'); if(className) sp.className=className; if(styles) Object.assign(sp.style,styles);
-  try{r.surroundContents(sp)}catch(e){const f=r.extractContents();sp.appendChild(f);r.insertNode(sp)}
-  getSelection().removeAllRanges(); savedRange=null; E.focus();
+  const fragment=r.extractContents();
+  // Remove only the properties being replaced inside the selected fragment.
+  // Otherwise an older inner span overrides the new outer span.
+  if(styles) fragment.querySelectorAll('[style]').forEach(node=>{
+    Object.keys(styles).forEach(key=>node.style[key]='');
+  });
+  sp.appendChild(fragment);r.insertNode(sp);
+  r.selectNodeContents(sp);
+  const selection=getSelection();selection.removeAllRanges();selection.addRange(r);
+  savedRange=r.cloneRange();
+  parse();
 }
 document.querySelectorAll('.tool').forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
 $('#leftMark').onclick=()=>wrapSelection('speaker-left');
@@ -271,7 +282,13 @@ function parse(){
 
     if(raw.trim()){
       if(bufType==='d'){
-        pages[pi].push({type:'d',side:bufSide||'left',text:raw.trim()});
+        // Trim the message edges without dropping styles on individual text runs.
+        const runs=buf.map(a=>({...a}));
+        while(runs.length && !runs[0].text.trim())runs.shift();
+        while(runs.length && !runs[runs.length-1].text.trim())runs.pop();
+        runs[0].text=runs[0].text.trimStart();
+        runs[runs.length-1].text=runs[runs.length-1].text.trimEnd();
+        pages[pi].push({type:'d',side:bufSide||'left',html:runs.map(styleText).join('')});
       }else{
         const html=buf.map(styleText).join('').trim().replace(/\n/g,'<br>');
         if(html)pages[pi].push({type:'n',html});
@@ -353,7 +370,7 @@ function render(){
   pages.forEach((p,i)=>{const b=document.createElement('button');b.className='tab'+(i===current?' on':'');b.textContent='PAGE '+(i+1);b.onclick=()=>{current=i;render()};tabs.appendChild(b)});
   const m=$('#messages');m.innerHTML='';
   (pages[current]||[]).forEach(x=>{
-    if(x.type==='d'){const r=document.createElement('div');r.className='row '+x.side;const b=document.createElement('div');b.className='bubble';b.textContent=x.text;r.appendChild(b);m.appendChild(r)}
+    if(x.type==='d'){const r=document.createElement('div');r.className='row '+x.side;const b=document.createElement('div');b.className='bubble';b.innerHTML=sanitize(x.html);r.appendChild(b);m.appendChild(r)}
     else{const n=document.createElement('div');n.className='nar';n.innerHTML=sanitize(x.html);m.appendChild(n)}
   });
 }
@@ -374,6 +391,7 @@ async function shot(name){
   target.style.overflow='hidden';
 
   try{
+    await document.fonts.ready;
     const u=await mod.toPng(target,{pixelRatio:3,backgroundColor:'#fff'});
     const a=document.createElement('a');a.href=u;a.download=name;a.click();
   } finally {
@@ -383,8 +401,8 @@ async function shot(name){
     target.style.overflow=oldOverflow;
   }
 }
-$('#png').onclick=async()=>{try{await shot('message-page-'+(current+1)+'.png')}catch(e){alert('PNG 저장에 실패했어. 인터넷 연결 상태를 확인해 줘.')}};
-$('#pngAll').onclick=async()=>{const old=current;try{for(let i=0;i<pages.length;i++){current=i;render();await new Promise(r=>setTimeout(r,120));await shot('message-page-'+(i+1)+'.png');await new Promise(r=>setTimeout(r,250))}}catch(e){alert('브라우저에서 여러 파일 다운로드를 허용해 줘.')}current=old;render()};
+$('#png').onclick=async()=>{try{parse();await shot('message-page-'+(current+1)+'.png')}catch(e){alert('PNG 저장에 실패했어. 인터넷 연결 상태를 확인해 줘.')}};
+$('#pngAll').onclick=async()=>{parse();const old=current;try{for(let i=0;i<pages.length;i++){current=i;render();await new Promise(r=>setTimeout(r,120));await shot('message-page-'+(i+1)+'.png');await new Promise(r=>setTimeout(r,250))}}catch(e){alert('브라우저에서 여러 파일 다운로드를 허용해 줘.')}current=old;render()};
 settings();render();
 </script>
 </body></html>
