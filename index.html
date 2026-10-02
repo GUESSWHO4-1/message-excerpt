@@ -506,15 +506,15 @@ async function shot(name){
   const oldShadow=target.style.boxShadow;
   const oldOverflow=target.style.overflow;
 
-  // 둥근 모서리를 유지하고, 모서리 바깥은 투명하게 저장함.
-  target.style.borderRadius='28px';
+  // 각진 모서리로 화면 끝까지 채워 저장함.
+  target.style.borderRadius='0';
   target.style.border='0';
   target.style.boxShadow='none';
   target.style.overflow='hidden';
 
   try{
     await document.fonts.ready;
-    const u=await mod.toPng(target,{pixelRatio:3});
+    const u=await mod.toPng(target,{pixelRatio:3,backgroundColor:'#fff'});
     const a=document.createElement('a');a.href=u;a.download=name;a.click();
   } finally {
     target.style.borderRadius=oldRadius;
